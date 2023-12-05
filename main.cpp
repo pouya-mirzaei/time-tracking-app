@@ -74,8 +74,17 @@ void displayExistingData()
   else
   {
     system("cls");
-    cout << date[0] << "/" << date[1] << "/" << date[2] << endl;
-    cout << START_DAY_TIME << " " << END_DAY_TIME << " " << WORK_TIME << " " << ALLOWED_DELAY;
+    // cout << START_DAY_TIME << " " << END_DAY_TIME << " " << WORK_TIME << " " << ALLOWED_DELAY;
+    printFormattedTime(totalWorkTime);
+
+    int a;
+
+    cout << "  1. back";
+    cin >> a;
+    if (a == 1)
+    {
+      showMainMenu("welcome back");
+    }
   }
 }
 
@@ -199,9 +208,47 @@ void getData()
   system("cls");
   int startHour, startMinute, finishHour, finishMinute;
 
-  getFirstDate();
+  if (date[0] == 0)
+  {
+    getFirstDate();
+  }
 
-  showMainMenu("hello");
+  system("cls");
+
+  int counter = 0, start, finish;
+
+  while (true)
+  {
+    counter++;
+    if (counter > 1)
+    {
+      break;
+    }
+
+    cout << "Enter the staring time for :(HH:MM)";
+    printCurrentDate();
+    cout << endl;
+    cin >> startHour;
+    cin.ignore(1, ':');
+    cin >> startMinute;
+
+    start = hourToMinutes(startHour, startMinute);
+
+    cout << "Enter the finishing time for :(HH:MM)";
+    printCurrentDate();
+    cout << endl;
+    cin >> finishHour;
+    cin.ignore(1, ':');
+    cin >> finishMinute;
+
+    finish = hourToMinutes(finishHour, finishMinute);
+
+    totalWorkTime += finish - start;
+
+    nextDay();
+  }
+
+  showMainMenu("returned");
 }
 
 int hourToMinutes(int hour, int minutes)
