@@ -4,7 +4,6 @@ using namespace std;
 // Global variables
 string userName; // This is a temporary variable.The system might have a feature that can proccess several employees's actions in the future;
 bool isInitiated = false;
-int CLOCK_IN_HOUR, CLOCK_IN_MINUTES, CLOCK_OUT_HOUR, CLOCK_OUT_MINUTES;
 int START_DAY_TIME, END_DAY_TIME, WORK_TIME, ALLOWED_DELAY;
 
 int date[3] = {0, 0, 0};
@@ -13,8 +12,8 @@ int minDate[3] = {0, 0, 0};
 
 int totalWorkTime = 0, totalDelay = 0, totalAllowedDelay = 0, totalHaste = 0,
     totalAllowedHaste = 0, totalStartTime = 0, totalFinishTime = 0, dayCount = 0,
-    totalOverTime = 0, totalFraction = 0, maxWorkTime = 24 * 60,
-    minWorkTime = 0;
+    totalOverTime = 0, totalFraction = 0, maxWorkTime = 0,
+    minWorkTime = 24 * 60; // A full day = 24*60
 
 // ----------------------------------------------
 
@@ -28,6 +27,7 @@ int displayAndGetMenuResult(string msg);
 void start();
 void displayExistingData();
 void getData();
+void showResult(int time, string msg);
 
 // Date calculations
 void getFirstDate();
@@ -54,7 +54,7 @@ void app()
   cout << "\nTo get started, please tell us your name:\n";
   cin >> userName;
 
-  showMainMenu("Please select an option to start:");
+  showMainMenu("Please select an option to start: ");
 }
 
 void start()
@@ -75,7 +75,7 @@ void start()
 
 void displayExistingData()
 {
-  if (!isInitiated) // ------------------------------------------- this must be changed in the future
+  if (dayCount == 0) // ------------------------------------------- this must be changed in the future
   {
     showMainMenu("You have not any data in the app. Please start the app first");
   }
@@ -83,52 +83,20 @@ void displayExistingData()
   {
     system("cls");
 
-    cout << "total work time :";
-    printFormattedTime(totalWorkTime);
-    cout << "\n";
-
-    cout << "total delay :";
-    printFormattedTime(totalDelay);
-    cout << "\n";
-
-    cout << "total allowed delay :";
-    printFormattedTime(totalAllowedDelay);
-    cout << "\n";
-
-    cout << "total haste :";
-    printFormattedTime(totalHaste);
-    cout << "\n";
-
-    cout << "total allowed haste :";
-    printFormattedTime(totalAllowedHaste);
-    cout << "\n";
-
-    cout << "total start time :";
-    printFormattedTime(totalStartTime);
-    cout << "\n";
-
-    cout << "total finish time :";
-    printFormattedTime(totalFinishTime);
-    cout << "\n";
-
-    cout << "max worked time :";
-    printFormattedTime(maxWorkTime);
-    cout << "\n";
-
-    cout << "min worked time :";
-    printFormattedTime(minWorkTime);
-    cout << "\n";
-
-    cout << "total overtime :";
-    printFormattedTime(totalOverTime);
-    cout << "\n";
-
-    cout << "total fraction :";
-    printFormattedTime(totalFraction);
-    cout << "\n";
+    showResult(totalWorkTime, "total work time : ");
+    showResult(totalDelay, "total delay : ");
+    showResult(totalAllowedDelay, "total allowed delay : ");
+    showResult(totalHaste, "total haste : ");
+    showResult(totalAllowedHaste, "total allowed  haste : ");
+    showResult(totalStartTime, "total start time : ");
+    showResult(totalFinishTime, "total finish time : ");
+    showResult(maxWorkTime, "max worked time : ");
+    showResult(minWorkTime, "min worked time : ");
+    showResult(totalOverTime, "total overtime : ");
+    showResult(totalFraction, "total fraction : ");
 
     int a;
-    cout << "\n  1. back";
+    cout << "1. back\n";
     cin >> a;
     if (a == 1)
     {
@@ -201,8 +169,6 @@ void initiateApp()
       cout << "Invalid time format. Please enter the time in the correct format (HH:MM): \n";
     else
     {
-      CLOCK_IN_HOUR = hour;
-      CLOCK_IN_MINUTES = minutes;
       START_DAY_TIME = hourToMinutes(hour, minutes);
       break;
     }
@@ -219,8 +185,6 @@ void initiateApp()
       cout << "Invalid time format. Please enter the time in the correct format (HH:MM): \n";
     else
     {
-      CLOCK_OUT_HOUR = hour;
-      CLOCK_OUT_MINUTES = minutes;
       END_DAY_TIME = hourToMinutes(hour, minutes);
       break;
     }
@@ -229,7 +193,7 @@ void initiateApp()
   WORK_TIME = END_DAY_TIME - START_DAY_TIME;
   if (WORK_TIME < 0)
   {
-    showMainMenu("Invalid end time. the ending time cannot be before the starting time. start again");
+    showMainMenu("Invalid end time: the ending time cannot be before the starting time. start again");
     return;
   }
 
@@ -260,21 +224,19 @@ void getData()
     getFirstDate();
   }
 
-  system("cls");
-
   while (true)
   {
+    system("cls");
     cout << "Enter your staring time for : ";
     printDate(date);
     cout << endl;
-    cout << "(If today is holiday,enter -2. Enter -1 to return to the main menu.)\n";
+    cout << "( Enter -1 to return to the main menu. If today is holiday,enter -2 )\n";
     cin >> startHour;
     if (startHour == -1)
       break;
     if (startHour == -2)
     {
       nextDay();
-      dayCount++;
       continue;
     }
     cin.ignore(1, ':');
@@ -382,7 +344,7 @@ void printFormattedTime(int minutes)
   else
     cout << hour;
 
-  cout << ":";
+  cout << ": ";
 
   if (minute < 10)
     cout << "0" << minute;
@@ -419,4 +381,11 @@ void analyzeWorkingTime(int start_h, int start_m, int finish_h, int finish_m)
   int fraction = WORK_TIME - workTime;
   if (fraction > 0)
     totalFraction += fraction;
+}
+
+void showResult(int time, string msg)
+{
+  cout << msg;
+  printFormattedTime(time);
+  cout << "\n";
 }
