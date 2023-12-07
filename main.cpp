@@ -8,13 +8,19 @@ int CLOCK_IN_HOUR, CLOCK_IN_MINUTES, CLOCK_OUT_HOUR, CLOCK_OUT_MINUTES;
 int START_DAY_TIME, END_DAY_TIME, WORK_TIME, ALLOWED_DELAY;
 
 int date[3] = {0, 0, 0};
+int maxDate[3] = {0, 0, 0};
+int minDate[3] = {0, 0, 0};
 
 int totalWorkTime = 0, totalDelay = 0, totalAllowedDelay = 0, totalHaste = 0,
-    totalAllowedHaste = 0, totalStartTime = 0, totalEndTime = 0;
+    totalAllowedHaste = 0, totalStartTime = 0, totalFinishTime = 0, dayCount = 0,
+    totalOverTime = 0, totalFraction = 0, maxWorkTime = 24 * 60,
+    minWorkTime = 0;
 
 // ----------------------------------------------
 
 // Function Declarations  :
+
+// App structure
 void app();
 void initiateApp();
 void showMainMenu(string msg);
@@ -22,13 +28,16 @@ int displayAndGetMenuResult(string msg);
 void start();
 void displayExistingData();
 void getData();
-void printCurrentDate();
 
+// Date calculations
 void getFirstDate();
 void nextDay();
+void printDate(int d[]);
 
+// Calculations
 int hourToMinutes(int hour, int minutes);
 void printFormattedTime(int minutes);
+void analyzeWorkingTime(int start_h, int start_m, int finish_h, int finish_m);
 
 //------------ main code
 
@@ -73,12 +82,53 @@ void displayExistingData()
   else
   {
     system("cls");
-    // cout << START_DAY_TIME << " " << END_DAY_TIME << " " << WORK_TIME << " " << ALLOWED_DELAY;
+
+    cout << "total work time :";
     printFormattedTime(totalWorkTime);
+    cout << "\n";
+
+    cout << "total delay :";
+    printFormattedTime(totalDelay);
+    cout << "\n";
+
+    cout << "total allowed delay :";
+    printFormattedTime(totalAllowedDelay);
+    cout << "\n";
+
+    cout << "total haste :";
+    printFormattedTime(totalHaste);
+    cout << "\n";
+
+    cout << "total allowed haste :";
+    printFormattedTime(totalAllowedHaste);
+    cout << "\n";
+
+    cout << "total start time :";
+    printFormattedTime(totalStartTime);
+    cout << "\n";
+
+    cout << "total finish time :";
+    printFormattedTime(totalFinishTime);
+    cout << "\n";
+
+    cout << "max worked time :";
+    printFormattedTime(maxWorkTime);
+    cout << "\n";
+
+    cout << "min worked time :";
+    printFormattedTime(minWorkTime);
+    cout << "\n";
+
+    cout << "total overtime :";
+    printFormattedTime(totalOverTime);
+    cout << "\n";
+
+    cout << "total fraction :";
+    printFormattedTime(totalFraction);
+    cout << "\n";
 
     int a;
-
-    cout << "  1. back";
+    cout << "\n  1. back";
     cin >> a;
     if (a == 1)
     {
@@ -203,35 +253,73 @@ void initiateApp()
 void getData()
 {
   system("cls");
-  int startHour, startMinute, finishHour, finishMinute;
+  int startHour, startMinute, finishHour, finishMinute, currentDayWorkTime;
 
   if (date[0] == 0)
   {
     getFirstDate();
   }
+
+  system("cls");
+
+  while (true)
+  {
+    cout << "Enter your staring time for : ";
+    printDate(date);
+    cout << endl;
+    cout << "(If today is holiday,enter -2. Enter -1 to return to the main menu.)\n";
+    cin >> startHour;
+    if (startHour == -1)
+      break;
+    if (startHour == -2)
+    {
+      nextDay();
+      dayCount++;
+      continue;
+    }
+    cin.ignore(1, ':');
+    cin >> startMinute;
+    while (startMinute >= 60 || startMinute < 0 || startHour >= 24 || startHour < 0)
+    {
+      cout << "Invalid time format :( try again\n";
+      cin >> startHour;
+      cin.ignore(1, ':');
+      cin >> startMinute;
+    }
+
+    cout << "Enter your finishing time for : ";
+    printDate(date);
+    cout << endl;
+    cin >> finishHour;
+    cin.ignore(1, ':');
+    cin >> finishMinute;
+    currentDayWorkTime = (finishHour - startHour) * 60 + (finishMinute - startMinute);
+
+    while (finishMinute >= 60 || finishMinute < 0 || finishHour >= 24 || finishHour < 0 || currentDayWorkTime < 0)
+    {
+      cout << "Invalid time format or wrong finishing hour :( try again\n";
+      cin >> finishHour;
+      cin.ignore(1, ':');
+      cin >> finishMinute;
+      currentDayWorkTime = (finishHour - startHour) * 60 + (finishMinute - startMinute);
+    }
+
+    //------------------------------ calculations :
+
+    totalWorkTime += currentDayWorkTime;
+    totalStartTime += startHour * 60 + startMinute;
+    totalFinishTime += finishHour * 60 + finishMinute;
+    maxWorkTime = currentDayWorkTime >= maxWorkTime ? currentDayWorkTime : maxWorkTime;
+    minWorkTime = currentDayWorkTime <= minWorkTime ? currentDayWorkTime : minWorkTime;
+    analyzeWorkingTime(startHour, startMinute, finishHour, finishMinute);
+
+    dayCount++;
+    nextDay();
+  }
+  showMainMenu("returned");
 }
 
-int hourToMinutes(int hour, int minutes)
-{
-  return hour * 60 + minutes;
-}
-
-void printFormattedTime(int minutes)
-{
-  int hour = minutes / 60;
-  int minute = minutes % 60;
-  if (hour < 10)
-    cout << "0" << hour;
-  else
-    cout << hour;
-
-  cout << ":";
-
-  if (minute < 10)
-    cout << "0" << minute;
-  else
-    cout << minute;
-}
+// Date calculations :
 
 void getFirstDate()
 {
@@ -272,7 +360,63 @@ void nextDay()
     date[0]++;
   }
 }
-void printCurrentDate()
+
+void printDate(int d[])
 {
-  cout << date[0] << "/" << date[1] << "/" << date[2];
+  cout << d[0] << "/" << d[1] << "/" << d[2];
+}
+
+// Calculations:
+
+int hourToMinutes(int hour, int minutes)
+{
+  return hour * 60 + minutes;
+}
+
+void printFormattedTime(int minutes)
+{
+  int hour = minutes / 60;
+  int minute = minutes % 60;
+  if (hour < 10)
+    cout << "0" << hour;
+  else
+    cout << hour;
+
+  cout << ":";
+
+  if (minute < 10)
+    cout << "0" << minute;
+  else
+    cout << minute;
+}
+
+void analyzeWorkingTime(int start_h, int start_m, int finish_h, int finish_m)
+{
+  int start = start_h * 60 + start_m;
+  int finish = finish_h * 60 + finish_m;
+  int workTime = finish - start;
+
+  // delay
+  int delay = start - START_DAY_TIME;
+  if (delay > 0 && delay <= ALLOWED_DELAY && workTime >= WORK_TIME)
+    totalAllowedDelay += delay;
+  else if (delay > 0)
+    totalDelay += delay;
+
+  // haste
+  int haste = END_DAY_TIME - finish;
+  if (haste > 0 && haste <= ALLOWED_DELAY && workTime >= WORK_TIME)
+    totalAllowedHaste += haste;
+  else if (haste > 0)
+    totalHaste += haste;
+
+  // overtime
+  int overtime = workTime - WORK_TIME;
+  if (overtime > 0)
+    totalOverTime += overtime;
+
+  // fraction
+  int fraction = WORK_TIME - workTime;
+  if (fraction > 0)
+    totalFraction += fraction;
 }
