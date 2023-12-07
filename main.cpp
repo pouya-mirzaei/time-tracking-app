@@ -1,5 +1,4 @@
 #include <iostream>
-#include <stdalign.h>
 using namespace std;
 
 // Global variables
@@ -145,7 +144,6 @@ void initiateApp()
   cout << "Please enter your company's starting time in 24-hour format. (HH:MM)\n";
   while (true)
   {
-    int hour, minutes;
     cin >> hour;
     cin.ignore(1, ':');
     cin >> minutes;
@@ -163,7 +161,6 @@ void initiateApp()
   cout << "Now enter your company's ending time in 24-hour format. (HH:MM)\n";
   while (true)
   {
-    int hour, minutes;
     cin >> hour;
     cin.ignore(1, ':');
     cin >> minutes;
@@ -182,7 +179,7 @@ void initiateApp()
   WORK_TIME = END_DAY_TIME - START_DAY_TIME;
   if (WORK_TIME < 0)
   {
-    cout << "Invalid end time. the ending time cannot be before the starting time";
+    showMainMenu("Invalid end time. the ending time cannot be before the starting time. start again");
     return;
   }
 
@@ -212,43 +209,6 @@ void getData()
   {
     getFirstDate();
   }
-
-  system("cls");
-
-  int counter = 0, start, finish;
-
-  while (true)
-  {
-    counter++;
-    if (counter > 1)
-    {
-      break;
-    }
-
-    cout << "Enter the staring time for :(HH:MM)";
-    printCurrentDate();
-    cout << endl;
-    cin >> startHour;
-    cin.ignore(1, ':');
-    cin >> startMinute;
-
-    start = hourToMinutes(startHour, startMinute);
-
-    cout << "Enter the finishing time for :(HH:MM)";
-    printCurrentDate();
-    cout << endl;
-    cin >> finishHour;
-    cin.ignore(1, ':');
-    cin >> finishMinute;
-
-    finish = hourToMinutes(finishHour, finishMinute);
-
-    totalWorkTime += finish - start;
-
-    nextDay();
-  }
-
-  showMainMenu("returned");
 }
 
 int hourToMinutes(int hour, int minutes)
@@ -294,7 +254,7 @@ void getFirstDate()
 
 void nextDay()
 {
-  int y = date[0], m = date[1], d = date[2];
+  int m = date[1], d = date[2];
 
   if (d + 1 <= 30)
   {
