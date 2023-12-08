@@ -9,3 +9,7 @@
 - [ ]the bug with the infinity loop in the validation loops
 
 ### all months are going to have 30 days
+
+#### delay and haste time results
+
+#### usual times

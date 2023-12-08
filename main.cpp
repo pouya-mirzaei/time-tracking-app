@@ -7,8 +7,10 @@ bool isInitiated = false;
 int START_DAY_TIME, END_DAY_TIME, WORK_TIME, ALLOWED_DELAY;
 
 int date[3] = {0, 0, 0};
-int maxDate[3] = {0, 0, 0};
-int minDate[3] = {0, 0, 0};
+int maxDate[100];
+int minDate[100];
+int maxDateCount = 0;
+int minDateCount = 0;
 
 int totalWorkTime = 0, totalDelay = 0, totalAllowedDelay = 0, totalHaste = 0,
     totalAllowedHaste = 0, totalStartTime = 0, totalFinishTime = 0, dayCount = 0,
@@ -38,6 +40,8 @@ void printDate(int d[]);
 int hourToMinutes(int hour, int minutes);
 void printFormattedTime(int minutes);
 void analyzeWorkingTime(int start_h, int start_m, int finish_h, int finish_m);
+
+void showScoreboard();
 
 //------------ main code
 
@@ -76,32 +80,78 @@ void start()
 void displayExistingData()
 {
   if (dayCount == 0) // ------------------------------------------- this must be changed in the future
-  {
     showMainMenu("You have not any data in the app. Please start the app first");
-  }
-  else
+
+  system("cls");
+
+  cout << "Dear " << userName << ", here is your working statistics for " << dayCount << " days";
+
+  cout << "\n  1. Total and average working times";
+  cout << "\n  2. Usual working times";
+  cout << "\n  3. Delays and hastes";
+  cout << "\n  4. Scoreboard";
+  cout << "\n  5. Other results";
+  cout << "\n  6. Back\n";
+
+  int input;
+  cin >> input;
+
+  switch (input)
   {
+  case 1:
     system("cls");
+    showResult(totalWorkTime, "Your total work time is : ");
+    showResult(totalWorkTime / dayCount, "Your average work time is : ");
+    cout << "  1. Back\n";
+    cin >> input;
+    if (input == 1)
+      displayExistingData();
+    break;
 
-    showResult(totalWorkTime, "total work time : ");
-    showResult(totalDelay, "total delay : ");
-    showResult(totalAllowedDelay, "total allowed delay : ");
-    showResult(totalHaste, "total haste : ");
-    showResult(totalAllowedHaste, "total allowed  haste : ");
-    showResult(totalStartTime, "total start time : ");
-    showResult(totalFinishTime, "total finish time : ");
-    showResult(maxWorkTime, "max worked time : ");
-    showResult(minWorkTime, "min worked time : ");
-    showResult(totalOverTime, "total overtime : ");
-    showResult(totalFraction, "total fraction : ");
+  case 2:
+    system("cls");
+    showResult(totalStartTime / dayCount, "Your usual starting time is : ");
+    showResult(totalFinishTime / dayCount, "Your usual finishing time is : ");
+    cout << "  1. Back\n";
+    cin >> input;
+    if (input == 1)
+      displayExistingData();
+    break;
+  case 3:
+    showScoreboard();
+    break;
 
-    int a;
-    cout << "1. back\n";
-    cin >> a;
-    if (a == 1)
-    {
-      showMainMenu("welcome back");
-    }
+  case 4:
+    system("cls");
+    showResult(totalDelay, "Total delay : ");
+    showResult(totalAllowedDelay, "Total allowed delay : ");
+    showResult(totalHaste, "Total haste : ");
+    showResult(totalAllowedHaste, "Total allowed  haste : ");
+    cout << "  1. Back\n";
+    cin >> input;
+    if (input == 1)
+      displayExistingData();
+
+    break;
+
+  case 5:
+    system("cls");
+    showResult(maxWorkTime, "Your maximum worked time : ");
+    showResult(minWorkTime, "Your minimum worked time : ");
+    showResult(totalOverTime, "Your total overtime : ");
+    showResult(totalFraction, "Your total fraction : ");
+    cout << "  1. Back\n";
+    cin >> input;
+    if (input == 1)
+      displayExistingData();
+    break;
+
+  case 6:
+    showMainMenu("Welcome back " + userName);
+    break;
+
+  default:
+    break;
   }
 }
 
@@ -224,13 +274,14 @@ void getData()
     getFirstDate();
   }
 
+  system("cls");
+
   while (true)
   {
-    system("cls");
     cout << "Enter your staring time for : ";
     printDate(date);
     cout << endl;
-    cout << "( Enter -1 to return to the main menu. If today is holiday,enter -2 )\n";
+    cout << "(Enter -1 to return to the main menu. If today is holiday,enter -2)\n";
     cin >> startHour;
     if (startHour == -1)
       break;
@@ -271,9 +322,40 @@ void getData()
     totalWorkTime += currentDayWorkTime;
     totalStartTime += startHour * 60 + startMinute;
     totalFinishTime += finishHour * 60 + finishMinute;
-    maxWorkTime = currentDayWorkTime >= maxWorkTime ? currentDayWorkTime : maxWorkTime;
-    minWorkTime = currentDayWorkTime <= minWorkTime ? currentDayWorkTime : minWorkTime;
     analyzeWorkingTime(startHour, startMinute, finishHour, finishMinute);
+
+    if (currentDayWorkTime == maxWorkTime)
+    {
+      maxWorkTime = currentDayWorkTime;
+      maxDate[maxDateCount * 3] = date[0];
+      maxDate[maxDateCount * 3 + 1] = date[1];
+      maxDate[maxDateCount * 3 + 2] = date[2];
+      maxDateCount++;
+    }
+    else if (currentDayWorkTime > maxWorkTime)
+    {
+      maxWorkTime = currentDayWorkTime;
+      maxDateCount = 1;
+      maxDate[0] = date[0];
+      maxDate[1] = date[1];
+      maxDate[2] = date[2];
+    }
+    if (currentDayWorkTime == minWorkTime)
+    {
+      minWorkTime = currentDayWorkTime;
+      minDate[minDateCount * 3] = date[0];
+      minDate[minDateCount * 3 + 1] = date[1];
+      minDate[minDateCount * 3 + 2] = date[2];
+      minDateCount++;
+    }
+    else if (currentDayWorkTime < minWorkTime)
+    {
+      minWorkTime = currentDayWorkTime;
+      minDateCount = 1;
+      minDate[0] = date[0];
+      minDate[1] = date[1];
+      minDate[2] = date[2];
+    }
 
     dayCount++;
     nextDay();
@@ -291,7 +373,7 @@ void getFirstDate()
   cin >> date[1];
   cin.ignore(1, '/');
   cin >> date[2];
-  while (date[0] < 1000 || date[0] > 9999 || date[1] < 0 || date[1] > 12 || date[2] < 0 || date[2] > 30)
+  while (date[0] < 1000 || date[0] > 9999 || date[1] <= 0 || date[1] > 12 || date[2] <= 0 || date[2] > 30)
   {
     cout << "Invalid date :( try again\n";
     cin >> date[0];
@@ -344,7 +426,7 @@ void printFormattedTime(int minutes)
   else
     cout << hour;
 
-  cout << ": ";
+  cout << ":";
 
   if (minute < 10)
     cout << "0" << minute;
@@ -388,4 +470,52 @@ void showResult(int time, string msg)
   cout << msg;
   printFormattedTime(time);
   cout << "\n";
+}
+
+void showScoreboard()
+{
+  system("cls");
+
+  if (maxDateCount == 1)
+  {
+    cout << "Your maximum work time is ";
+    printFormattedTime(maxWorkTime);
+    cout << " at ";
+    printDate(maxDate);
+  }
+  if (maxDateCount > 1)
+  {
+    cout << "Your maximum work time is ";
+    printFormattedTime(maxWorkTime);
+    cout << " at these dates :\n";
+
+    for (int i = 0; i < maxDateCount * 3; i += 3)
+      cout << maxDate[i] << "/" << maxDate[i + 1] << "/" << maxDate[i + 2] << endl;
+  }
+
+  cout << endl;
+
+  if (minDateCount == 1)
+  {
+    cout << "Your minimum work time is ";
+    printFormattedTime(minWorkTime);
+    cout << " at ";
+    printDate(minDate);
+  }
+  if (minDateCount > 1)
+  {
+    cout << "Your minimum work time is ";
+    printFormattedTime(minWorkTime);
+    cout << " at these dates :\n";
+
+    for (int i = 0; i < minDateCount * 3; i += 3)
+      cout << minDate[i] << "/" << minDate[i + 1] << "/" << minDate[i + 2] << endl;
+  }
+
+  int input;
+  cout << "\n  1. Back";
+  cin >> input;
+
+  if (input == 1)
+    displayExistingData();
 }
