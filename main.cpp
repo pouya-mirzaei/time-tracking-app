@@ -274,10 +274,9 @@ void getData()
     getFirstDate();
   }
 
-  system("cls");
-
   while (true)
   {
+    system("cls");
     cout << "Enter your staring time for : ";
     printDate(date);
     cout << endl;
@@ -513,7 +512,7 @@ void showScoreboard()
   }
 
   int input;
-  cout << "\n  1. Back";
+  cout << "\n  1. Back\n";
   cin >> input;
 
   if (input == 1)
